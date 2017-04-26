@@ -1,0 +1,48 @@
+// Grant all permissions to the sandbox code
+grant codeBase "file:${user.home}/${sbox.home.url}/-" {
+    permission java.security.AllPermission;
+};
+
+
+// Grant all permissions to the scala library
+grant codeBase "file:${user.home}/.ivy2/cache/org.scala-lang/-" {
+    permission java.security.AllPermission;
+};
+
+// When launching from IntelliJ its runtime needs all permissions too
+grant codeBase "file:/Applications/IntelliJ%20IDEA.app/Contents/lib/idea_rt.jar" {
+    permission java.security.AllPermission;
+};
+
+//grant codeBase "file:${java.home}/-" {
+//    permission java.security.AllPermission;
+//    permission java.io.FilePermission "<<ALL FILES>>", "read, write, execute";
+//};
+
+
+// Java Extensions get all permissions
+grant codeBase "file:${java.ext.dirs}/*" {
+    permission java.security.AllPermission;
+};
+
+grant codeBase "file:${user.home}/code/SandboxResearch/playground/plugins/target/scala-2.12/-" {
+    // Basic permissions
+    permission java.util.PropertyPermission "*", "read";
+    // Debug only permissions. Remove before prod
+    permission java.lang.RuntimePermission "getProtectionDomain";
+    permission java.security.SecurityPermission "getPolicy";
+    // Demo permissions
+    // Plugin2
+    // permission java.lang.RuntimePermission "createClassLoader";
+    // Plugin3
+    // permission java.lang.RuntimePermission "accessDeclaredMembers";
+    // permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+    // Plugin 4
+    // permission java.security.SecurityPermission "setProperty.package.access";
+    // Plugin 5 - IC
+    // permission java.lang.RuntimePermission "accessClassInPackage.sun.*";
+    // Plugin 6
+    //
+
+
+};

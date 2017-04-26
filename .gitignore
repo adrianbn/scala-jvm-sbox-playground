@@ -15,3 +15,9 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+.idea/
+.DS_Store
+
+# Build folders
+target/
+project/
